@@ -1,2 +1,2 @@
 # aq11-algorithm
-for uni
+for uni.
