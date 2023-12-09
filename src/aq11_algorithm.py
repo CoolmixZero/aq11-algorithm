@@ -38,22 +38,11 @@ def apply_absorption_law(conditions):
     
     return simplified_conditions
 
-def create_conditions(df, common_attributes):
-    """Create conditions for rules based on common attributes."""
-    conditions = []
-    for _, row in df.iterrows():
-        conditions.append({attr: row[attr] for attr in common_attributes})
-    return conditions
-
-def create_rule_from_condition(condition):
-    """Generate a rule from a condition."""
-    return ' AND '.join([f"{k}='{v}'" for k, v in condition.items()])
-
 def print_conditions(conditions):
     """Print the conditions in a readable format."""
     rules = []
     for condition in conditions:
-        rule = ' AND '.join([i for i in condition.values()])
+        rule = ' AND '.join([f'{name}={val}' for name, val in condition.items()])
         rules.append(f'({rule})')
     print(' OR '.join(rules))
 
