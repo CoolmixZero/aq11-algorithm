@@ -23,7 +23,7 @@ def preprocess_data(data):
         if data[column].dtype.kind in 'ifc':
             data = convert_to_categorical(data, column)
     
-    return {'positive': data[data[label_column] == '+'], 'negative': data[data[label_column] == '-']}
+    return {'positive': data[data[label_column] == 1], 'negative': data[data[label_column] == 0]}
 
 if __name__ == "__main__":
     data = load_data('../data/example.csv')
