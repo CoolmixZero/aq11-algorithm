@@ -1,5 +1,4 @@
 import pandas as pd
-from sklearn.model_selection import train_test_split
 
 
 def load_data(file_path):
@@ -24,14 +23,10 @@ def preprocess_data(data):
         if data[column].dtype.kind in 'ifc':
             data = convert_to_categorical(data, column)
     
-    X_train, X_test, y_train, y_test = \
-        train_test_split(data.iloc[:, :-1], data[label_column], test_size=0.3, random_state=42)
-    return X_train, X_test, y_train, y_test
+    return {'positive': data[data[label_column] == '+'], 'negative': data[data[label_column] == '-']}
 
 if __name__ == "__main__":
     data = load_data('../data/example.csv')
-    X_train, X_test, y_train, y_test = preprocess_data(data)
-    print(X_train)
-    print(X_test)
-    print(y_train)
-    print(y_test)
+    preprocessed_data = preprocess_data(data)
+    print(preprocessed_data['positive'])
+    print(preprocessed_data['negative'])
