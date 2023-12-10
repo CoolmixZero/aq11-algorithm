@@ -1,5 +1,6 @@
 from inference import infer
 import pandas as pd
+from tqdm import tqdm
 
 
 def compare_sets(pos_row: pd.Series, negatives: pd.DataFrame) -> list[dict]:
@@ -46,12 +47,14 @@ def stringify_conditions(conditions: list[dict[str, ]]) -> str:
         condition_strings.append(f"({condition_str})")
     return ' OR '.join(condition_strings)
 
-def generate_rules(df_positive: pd.DataFrame, df_negative: pd.DataFrame) -> list[str]:
+def generate_rules(df_positive: pd.DataFrame, df_negative: pd.DataFrame) -> str:
     """Generate rules using the AQ11 approach."""
     rules = []
     df_positive_iter = [0]*len(df_positive)
+    pbar = tqdm(enumerate(df_positive.iterrows()), total=len(df_positive))
 
-    for i, (_, pos_row) in enumerate(df_positive.iterrows()):
+    for i, (_, pos_row) in pbar:
+        pbar.set_description(f"Processing positive example {i+1}/{len(df_positive)}")
         # Skip positive examples that have already been covered by a rule
         if df_positive_iter[i] == 1:
             continue
@@ -69,5 +72,7 @@ def generate_rules(df_positive: pd.DataFrame, df_negative: pd.DataFrame) -> list
         # Extend the rules list with the simplified conditions
         rules.extend(simplified_conditions)
     
+    print(f"Generated {len(rules)} rules. Applying absorption law...")
     final_rules = apply_absorption_law(rules)
+    print(f"Final rule set has {len(final_rules)} rules.")
     return stringify_conditions(final_rules)
