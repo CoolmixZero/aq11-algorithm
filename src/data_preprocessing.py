@@ -14,17 +14,16 @@ def convert_to_categorical(data: pd.DataFrame, column_name: str) -> pd.DataFrame
     # If there are fewer than 5 unique values, treat them as categories
     if len(unique_values) < 5:
         return data_cp
-    
+
     # Determine the bins for the quartiles, ensuring there are 4 breaks (3 quartile points plus min and max)
     bins = pd.qcut(data_cp[column_name], q=4, duplicates='drop', retbins=True)[1]
     # The labels should be based on the range from each bin to the next
-    quartile_labels = [f"{int(bins[i])}-{int(bins[i+1])}" for i in range(len(bins)-1)]
+    quartile_labels = [f"{int(bins[i])}-{int(bins[i + 1])}" for i in range(len(bins) - 1)]
 
     # Convert the numerical column to categorical based on the bins
     data_cp[column_name] = pd.cut(data_cp[column_name], bins=bins, labels=quartile_labels, include_lowest=True)
 
     return data_cp
-
 
 
 def preprocess_data(data: pd.DataFrame, for_training: bool = True) -> dict[str, pd.DataFrame]:

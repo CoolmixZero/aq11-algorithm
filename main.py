@@ -1,8 +1,9 @@
 import sys
-sys.path.append('src')
 from data_preprocessing import load_data, preprocess_data
 from aq11_algorithm import generate_rules
 from inference import evaluate_performance
+
+sys.path.append('src')
 
 
 def main():
@@ -21,6 +22,7 @@ def main():
     print("Evaluating performance...")
     metrics = evaluate_performance('data/rules.txt', 'data/student_stress.csv', 'stress_level', eval_samples)
     print(metrics)
+
 
 if __name__ == "__main__":
     main()

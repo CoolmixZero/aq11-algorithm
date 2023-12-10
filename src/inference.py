@@ -18,11 +18,13 @@ def parse_condition(condition: str):
     value = value.strip("'")
     return attribute, value
 
+
 def apply_condition_to_sample(attribute: str, value: str, sample: pd.Series) -> bool:
     """
     Applies a single condition to a sample.
     """
     return str(sample[attribute]) == value
+
 
 def apply_rule_to_sample(rules: str, sample: pd.Series) -> bool:
     """
@@ -33,10 +35,11 @@ def apply_rule_to_sample(rules: str, sample: pd.Series) -> bool:
     for disjunct in or_split:
         conjunct_conditions = disjunct.strip("()")
         conjunct_conditions = [conjunct_conditions] if ' AND ' not in conjunct_conditions \
-                              else conjunct_conditions.split(' AND ')
+            else conjunct_conditions.split(' AND ')
         if all(apply_condition_to_sample(*parse_condition(cond), sample) for cond in conjunct_conditions):
             return 1
     return 0
+
 
 def infer(rules: str, new_samples: pd.DataFrame) -> list:
     """
@@ -52,7 +55,8 @@ def infer(rules: str, new_samples: pd.DataFrame) -> list:
         predictions.append(apply_rule_to_sample(rules, sample))
     return predictions
 
-def evaluate_performance(rules: str, data_path: str, true_labels_column: str, 
+
+def evaluate_performance(rules: str, data_path: str, true_labels_column: str,
                          samples_num: int = 100) -> dict:
     """
     Evaluates the performance of the rules.
