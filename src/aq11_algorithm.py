@@ -24,17 +24,15 @@ def apply_absorption_law(conditions: list[dict[str, ]]) -> list[dict[str, ]]:
     # Start with all conditions marked as not absorbed
     absorbed = [False] * len(conditions)
 
-    pbar = tqdm(enumerate(conditions), total=len(conditions), disable=True)
-    if len(absorbed) > 500:
-        pbar.disable = False
+    pbar = tqdm(enumerate(conditions), total=len(conditions), leave=False)
+    if len(absorbed) > 1000:
+        pbar.leave = True
     for i, cond1 in pbar:
         pbar.set_description(f"Absorbing conditions {i+1}/{len(conditions)}")
         for j, cond2 in enumerate(conditions):
             if i != j and not absorbed[i] and not absorbed[j]:
-                # Check if cond1 is a subset of cond2 (cond1 absorbs cond2)
                 if all(item in cond2.items() for item in cond1.items()):
                     absorbed[j] = True
-                # Check if cond2 is a subset of cond1 (cond2 absorbs cond1)
                 elif all(item in cond1.items() for item in cond2.items()):
                     absorbed[i] = True
     
