@@ -52,7 +52,8 @@ def infer(rules: str, new_samples: pd.DataFrame) -> list:
         predictions.append(apply_rule_to_sample(rules, sample))
     return predictions
 
-def evaluate_performance(rules: str, data_path: str, true_labels_column: str) -> dict:
+def evaluate_performance(rules: str, data_path: str, true_labels_column: str, 
+                         samples_num: int = 100) -> dict:
     """
     Evaluates the performance of the rules.
 
@@ -72,13 +73,12 @@ def evaluate_performance(rules: str, data_path: str, true_labels_column: str) ->
 
     # Load the data
     data = load_data(data_path)
-    data = preprocess_data(data, for_training=False).iloc[:200]
+    data = preprocess_data(data, for_training=False).iloc[:samples_num]
     true_labels = data[true_labels_column]
     data = data.drop(columns=[true_labels_column])
 
     # Apply inference to get predictions
     predictions = infer(rules, data)
-    print(predictions)
 
     # Calculate performance metrics
     accuracy = accuracy_score(true_labels, predictions)
