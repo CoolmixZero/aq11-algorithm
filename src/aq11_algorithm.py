@@ -71,23 +71,3 @@ def generate_rules(df_positive: pd.DataFrame, df_negative: pd.DataFrame) -> list
     
     final_rules = apply_absorption_law(rules)
     return stringify_conditions(final_rules)
-
-def evaluate_instances(rules: list[dict[str, str]], instances: list[dict[str, str]]) -> list[int]:
-    """
-    Evaluate new instances using the generated rules.
-    Return a list of predicted labels (0 or 1) for each instance.
-    """
-    predictions = []
-
-    for instance in instances:
-        # Check if the instance satisfies any of the rules
-        for rule in rules:
-            if all(item in instance.items() for item in rule.items()):
-                # If the instance satisfies a rule, predict the corresponding label
-                predictions.append(1)
-                break
-        else:
-            # If the instance does not satisfy any rule, predict label 0
-            predictions.append(0)
-
-    return predictions
