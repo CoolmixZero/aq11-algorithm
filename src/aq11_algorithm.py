@@ -1,6 +1,4 @@
-from itertools import product
-from pprint import pprint
-
+from inference import infer
 import pandas as pd
 
 
@@ -13,11 +11,11 @@ def compare_sets(pos_row: pd.Series, negatives: pd.DataFrame) -> list[dict]:
             differences.append(diff)
     return differences
 
-def compare_two_elements(pos_row: pd.Series, neg_row: pd.Series) -> dict[str, str]:
+def compare_two_elements(pos_row: pd.Series, neg_row: pd.Series) -> dict[str, ]:
     """Compare two elements and identify differing attributes."""
     return pos_row[pos_row != neg_row].to_dict()
 
-def apply_absorption_law(conditions: list[dict[str, str]]) -> list[dict[str, str]]:
+def apply_absorption_law(conditions: list[dict[str, ]]) -> list[dict[str, ]]:
     """
     Applies the absorption law to a list of conditions to simplify the rule set.
     If one condition is a subset of another, it absorbs the other.
@@ -40,34 +38,39 @@ def apply_absorption_law(conditions: list[dict[str, str]]) -> list[dict[str, str
     
     return simplified_conditions
 
-def print_conditions(conditions: list[dict[str, str]]) -> None:
-    """Print the conditions in a readable format."""
-    rules = []
+def stringify_conditions(conditions: list[dict[str, ]]) -> str:
+    """Convert a list of condition dictionaries into a human-readable string format."""
+    condition_strings = []
     for condition in conditions:
-        rule = ' AND '.join([f'{name}={val}' for name, val in condition.items()])
-        rules.append(f'({rule})')
-    print(' OR '.join(rules))
+        condition_str = ' AND '.join([f"'{name}'='{val}'" for name, val in condition.items()])
+        condition_strings.append(f"({condition_str})")
+    return ' OR '.join(condition_strings)
 
 def generate_rules(df_positive: pd.DataFrame, df_negative: pd.DataFrame) -> list[str]:
     """Generate rules using the AQ11 approach."""
     rules = []
-    for _, pos_row in df_positive.iterrows():
+    df_positive_iter = [0]*len(df_positive)
+
+    for i, (_, pos_row) in enumerate(df_positive.iterrows()):
+        # Skip positive examples that have already been covered by a rule
+        if df_positive_iter[i] == 1:
+            continue
+
         # Compare the positive example with all negative examples
         differences = compare_sets(pos_row, df_negative)
         
-        print('Before absorption law:')
-        print_conditions(differences)
-        
         # Apply the absorption law to simplify the rule set
         simplified_conditions = apply_absorption_law(differences)
-        
-        print('After absorption law:')
-        print_conditions(simplified_conditions)
-        
+
+        # Infer the labels for the positive and negative examples
+        preds = infer(stringify_conditions(simplified_conditions), df_positive)
+        df_positive_iter = [max(preds[i], df_positive_iter[i]) for i in range(len(preds))]
+
         # Extend the rules list with the simplified conditions
         rules.extend(simplified_conditions)
-        
-    return rules
+    
+    final_rules = apply_absorption_law(rules)
+    return stringify_conditions(final_rules)
 
 def evaluate_instances(rules: list[dict[str, str]], instances: list[dict[str, str]]) -> list[int]:
     """

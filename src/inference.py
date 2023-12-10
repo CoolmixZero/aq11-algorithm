@@ -1,49 +1,44 @@
-def apply_rule_to_sample(rule, sample):
+import pandas as pd
+
+
+def parse_condition(condition: str):
     """
-    Evaluates a single rule against a sample.
-    
-    Parameters:
-    rule (str): The rule represented as a string of conditions.
-    sample (pd.Series): The data sample to evaluate the rule against.
-
-    Returns:
-    bool: True if the rule applies to the sample, False otherwise.
+    Parses a single condition and returns the attribute and value.
+    Adds error checking to ensure the condition is well-formed.
     """
-    # Split the rule by 'AND' to evaluate each condition
-    conditions = rule.split(' AND ')
-    for condition in conditions:
-        # Each condition is expected to be in the form 'attribute=value'
-        attribute, value = condition.split('=')
-        value = value.strip("'")  # Remove quotes around the value if present
-        # Check if the sample does not satisfy the condition
-        if str(sample[attribute]) != value:
-            return False
-    return True
+    parts = condition.split('=')
+    if len(parts) != 2:
+        raise ValueError(f"Condition '{condition}' is not well-formed.")
+    attribute, value = parts
+    attribute = attribute.strip("'")
+    value = value.strip("'")
+    return attribute, value
 
-def infer(rules, new_samples):
+def apply_condition_to_sample(attribute: str, value: str, sample: pd.Series) -> bool:
     """
-    Applies a set of rules to new data samples to infer outcomes.
+    Applies a single condition to a sample.
+    """
+    return str(sample[attribute]) == value
 
-    Parameters:
-    rules (list): A list of rules represented as strings.
-    new_samples (pd.DataFrame): New data samples to apply the rules to.
+def apply_rule_to_sample(rule: str, sample: pd.Series) -> bool:
+    """
+    Evaluates if the sample satisfies the given rule.
+    """
+    or_split = [rule] if ' OR ' not in rule else rule.split(' OR ')
 
-    Returns:
-    list: Inferred outcomes for each sample.
+    for disjunct in or_split:
+        conjunct_conditions = disjunct.strip("()")
+        conjunct_conditions = [conjunct_conditions] if ' AND ' not in conjunct_conditions \
+                              else conjunct_conditions.split(' AND ')
+        if all(apply_condition_to_sample(*parse_condition(cond), sample) for cond in conjunct_conditions):
+            return 1
+    return 0
+
+def infer(rules: str, new_samples: pd.DataFrame) -> list:
+    """
+    Apply stringified rules to new samples to infer the outcomes.
     """
     predictions = []
     for _, sample in new_samples.iterrows():
-        # Initialize the prediction as negative (assuming binary classification)
-        prediction = '-'
-        for rule in rules:
-            if apply_rule_to_sample(rule, sample):
-                # If any rule applies, the prediction is positive
-                prediction = '+'
-                break  # No need to check other rules if one matches
-        predictions.append(prediction)
+        predictions.append(apply_rule_to_sample(rules, sample))
     return predictions
-
-# Example usage:
-# Assuming `rules` is a list of strings representing the rules,
-# and `new_data` is a pandas DataFrame containing new samples:
-# predictions = infer(rules, new_data)
