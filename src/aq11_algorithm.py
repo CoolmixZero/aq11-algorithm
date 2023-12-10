@@ -75,10 +75,6 @@ def evaluate_instances(rules: list[dict[str, str]], instances: list[dict[str, st
     Return a list of predicted labels (0 or 1) for each instance.
     """
     predictions = []
-    
-    print(rules)
-    print("--------------------")
-    print(instances)
 
     for instance in instances:
         # Check if the instance satisfies any of the rules
