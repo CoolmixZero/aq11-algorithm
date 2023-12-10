@@ -27,7 +27,7 @@ def convert_to_categorical(data: pd.DataFrame, column_name: str) -> pd.DataFrame
 
 
 
-def preprocess_data(data: pd.DataFrame) -> dict[str, pd.DataFrame]:
+def preprocess_data(data: pd.DataFrame, for_training: bool = True) -> dict[str, pd.DataFrame]:
     """Preprocess the dataset."""
     label_column = data.columns[-1]
     processed_data = data.copy()
@@ -36,8 +36,10 @@ def preprocess_data(data: pd.DataFrame) -> dict[str, pd.DataFrame]:
         if processed_data[column_name].dtype.kind in 'ifc':
             processed_data = convert_to_categorical(processed_data, column_name)
 
-    return {'positive': processed_data[processed_data[label_column] == 1],
-            'negative': processed_data[processed_data[label_column] == 0]}
+    if for_training:
+        return {'positive': processed_data[processed_data[label_column] == 1],
+                'negative': processed_data[processed_data[label_column] == 0]}
+    return processed_data
 
 
 if __name__ == "__main__":
