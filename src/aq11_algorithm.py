@@ -1,8 +1,10 @@
 from itertools import product
 from pprint import pprint
 
+import pandas as pd
 
-def compare_sets(pos_row, negatives):
+
+def compare_sets(pos_row: pd.Series, negatives: pd.DataFrame) -> list[dict]:
     """Identify attributes that differ between positive and negative examples."""
     differences = []
     for _, neg_row in negatives.iterrows():
@@ -11,11 +13,11 @@ def compare_sets(pos_row, negatives):
             differences.append(diff)
     return differences
 
-def compare_two_elements(pos_row, neg_row):
+def compare_two_elements(pos_row: pd.Series, neg_row: pd.Series) -> dict[str, str]:
     """Compare two elements and identify differing attributes."""
     return pos_row[pos_row != neg_row].to_dict()
 
-def apply_absorption_law(conditions):
+def apply_absorption_law(conditions: list[dict[str, str]]) -> list[dict[str, str]]:
     """
     Applies the absorption law to a list of conditions to simplify the rule set.
     If one condition is a subset of another, it absorbs the other.
@@ -38,7 +40,7 @@ def apply_absorption_law(conditions):
     
     return simplified_conditions
 
-def print_conditions(conditions):
+def print_conditions(conditions: list[dict[str, str]]) -> None:
     """Print the conditions in a readable format."""
     rules = []
     for condition in conditions:
@@ -46,14 +48,20 @@ def print_conditions(conditions):
         rules.append(f'({rule})')
     print(' OR '.join(rules))
 
-def generate_rules(df_positive, df_negative):
+def generate_rules(df_positive: pd.DataFrame, df_negative: pd.DataFrame) -> list[str]:
     """Generate rules using the AQ11 approach."""
     rules = []
     for _, pos_row in df_positive.iterrows():
+        # Compare the positive example with all negative examples
         differences = compare_sets(pos_row, df_negative)
+        
         print('Before absorption law:')
         print_conditions(differences)
+        
+        # Apply the absorption law to simplify the rule set
         simplified_conditions = apply_absorption_law(differences)
+        
         print('After absorption law:')
         print_conditions(simplified_conditions)
+        
     return rules
